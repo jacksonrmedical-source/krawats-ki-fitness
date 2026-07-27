@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+body {
+  background-color: #FAF6EF;
+  color: #1B2A4A;
+}
+
+/* Signature element: the "breath ring" — a slow expand/contract pulse used
+   for progress indicators and loading states, echoing a breathing cycle
+   rather than a generic spinner. Respects reduced-motion. */
+@keyframes breathe {
+  0%, 100% { transform: scale(0.96); opacity: 0.85; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+.breath-ring {
+  animation: breathe 4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .breath-ring { animation: none; }
+}
