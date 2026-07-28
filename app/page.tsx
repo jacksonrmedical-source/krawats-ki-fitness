@@ -1,14 +1,29 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import CourseCard from "@/components/CourseCard";
 
 export default async function HomePage() {
   const supabase = createClient();
   const { data: courses } = await supabase
     .from("courses")
-    .select("id, slug, title, subtitle, cover_image_url, price_inr")
+    .select("id, slug, title, subtitle, cover_image_url, price_inr, modules(lessons(id, is_free_preview))")
     .eq("is_published", true)
     .order("sort_order")
     .limit(3);
+
+  const shaped = (courses || []).map((c: any) => {
+    const lessons = (c.modules || []).flatMap((m: any) => m.lessons || []);
+    return {
+      id: c.id,
+      slug: c.slug,
+      title: c.title,
+      subtitle: c.subtitle,
+      price_inr: c.price_inr,
+      cover_image_url: c.cover_image_url,
+      lesson_count: lessons.length,
+      has_free_preview: lessons.some((l: any) => l.is_free_preview),
+    };
+  });
 
   return (
     <div>
@@ -64,18 +79,16 @@ export default async function HomePage() {
 
       {/* Course catalog preview */}
       <section className="max-w-6xl mx-auto px-6 py-20">
-        <h2 className="font-display text-2xl text-ink mb-8">Courses</h2>
-        {courses && courses.length > 0 ? (
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="font-display text-2xl text-ink">Courses</h2>
+          <Link href="/courses" className="text-sm text-clay font-medium hover:underline">
+            View all →
+          </Link>
+        </div>
+        {shaped.length > 0 ? (
           <div className="grid md:grid-cols-3 gap-6">
-            {courses.map((c) => (
-              <Link
-                key={c.id}
-                href={`/courses/${c.slug}`}
-                className="block bg-mist rounded-card p-6 hover:bg-ink/5 transition-colors"
-              >
-                <h3 className="font-display text-xl text-ink mb-1">{c.title}</h3>
-                <p className="text-sm text-ink/60">{c.subtitle}</p>
-              </Link>
+            {shaped.map((c) => (
+              <CourseCard key={c.id} course={c} />
             ))}
           </div>
         ) : (
